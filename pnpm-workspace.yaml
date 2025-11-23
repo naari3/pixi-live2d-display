@@ -2,3 +2,4 @@ onlyBuiltDependencies:
   - edgedriver
   - esbuild
   - geckodriver
+packages: []

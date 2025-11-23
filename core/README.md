@@ -15,7 +15,7 @@ Unofficial declaration file of Cubism 2.1 core library. Already provided.
 Cubism 2.1 core library. It's no longer downloadable from the official site, but can be
 found [here](https://github.com/dylanNew/live2d/tree/master/webgl/Live2D/lib).
 
-### Cubism 4
+### Cubism 5
 
 To get these files, download the SDK [here](https://www.live2d.com/download/cubism-sdk/download-web/), then extract them from the `Core` directory.
 

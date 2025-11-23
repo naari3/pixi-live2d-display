@@ -274,10 +274,14 @@ export class Live2DFactory {
 
             const path = motionManager.getMotionFile(definition);
 
+            // Detect if this is Cubism 5 and load as text instead of json
+            const runtime = Live2DFactory.findRuntime(motionManager.settings);
+            const loadType = runtime?.constructor.name === "Cubism5Runtime" ? "text" : "json";
+
             taskGroup[index] ??= Live2DLoader.load({
                 url: path,
                 settings: motionManager.settings,
-                type: motionManager.motionDataType,
+                type: loadType,
                 target: motionManager,
             })
                 .then((data) => {

@@ -6,34 +6,9 @@ const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 // Available models configuration
 const availableModels = [
     {
-        name: "Local 06-v2 (Cubism 4)",
-        url: "models/06-v2.1024/06-v2.model3.json",
+        name: "Local Mao (Cubism 5)",
+        url: "models/Mao/Mao.model3.json",
         type: "local"
-    },
-    {
-        name: "Official Haru (Cubism 4)",
-        url: "https://cdn.jsdelivr.net/gh/Live2D/CubismWebSamples@master/Samples/Resources/Haru/Haru.model3.json",
-        type: "official"
-    },
-    {
-        name: "Official Hiyori (Cubism 4)", 
-        url: "https://cdn.jsdelivr.net/gh/Live2D/CubismWebSamples@master/Samples/Resources/Hiyori/Hiyori.model3.json",
-        type: "official"
-    },
-    {
-        name: "Official Wanko (Cubism 4)",
-        url: "https://cdn.jsdelivr.net/gh/Live2D/CubismWebSamples@master/Samples/Resources/Wanko/Wanko.model3.json", 
-        type: "official"
-    },
-    {
-        name: "Official Mao (Cubism 4)",
-        url: "https://cdn.jsdelivr.net/gh/Live2D/CubismWebSamples@master/Samples/Resources/Mao/Mao.model3.json",
-        type: "official"
-    },
-    {
-        name: "Official Shizuku (Cubism 2)",
-        url: "https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display@master/test/assets/shizuku/shizuku.model.json",
-        type: "official"
     }
 ];
 
@@ -47,15 +22,15 @@ async function loadModel(modelIndex: number) {
         console.log('Model loading already in progress, skipping...');
         return;
     }
-    
+
     const modelConfig = availableModels[modelIndex];
     if (!modelConfig) {
         throw new Error(`Invalid model index: ${modelIndex}`);
     }
     console.log(`Loading model: ${modelConfig.name}`);
-    
+
     isLoadingModel = true;
-    
+
     try {
         // Remove existing model safely
         if (currentModel) {
@@ -64,7 +39,7 @@ async function loadModel(modelIndex: number) {
                 if (app.stage.children.includes(currentModel)) {
                     app.stage.removeChild(currentModel);
                 }
-                
+
                 // Only destroy if model is fully initialized
                 if (currentModel.internalModel && typeof currentModel.destroy === 'function') {
                     currentModel.destroy();
@@ -74,35 +49,35 @@ async function loadModel(modelIndex: number) {
             }
             currentModel = null;
         }
-        
+
         // Load new model
         const model = await Live2DModel.from(modelConfig.url, {
             ticker: Ticker.shared,
         });
         model.setRenderer(app.renderer);
-        
+
         // Scale and position model
-        const scale = Math.min(window.innerWidth / model.width, 
-                              window.innerHeight / model.height) * 0.8;
+        const scale = Math.min(window.innerWidth / model.width,
+            window.innerHeight / model.height) * 0.8;
         model.scale.set(scale);
-        
+
         // Center the model by setting anchor to center
         model.anchor.set(0.5, 0.5);
         model.x = window.innerWidth / 2;
         model.y = window.innerHeight / 2;
-        
+
         // Add to stage
         app.stage.addChild(model);
-        
+
         // Update controls for new model if they exist
         updateControlsForModel(model);
-        
+
         currentModel = model;
         currentModelIndex = modelIndex;
-        
+
         console.log(`Model loaded successfully: ${modelConfig.name}`);
         return model;
-        
+
     } catch (error) {
         console.error(`Failed to load model ${modelConfig.name}:`, error);
         throw error;
@@ -124,23 +99,23 @@ async function main() {
         powerPreference: 'high-performance', // Use high-performance GPU if available
         premultipliedAlpha: false, // Better for Live2D rendering
     });
-    
+
     // Setup model selector
     setupModelSelector();
-    
+
     // Setup render quality controls
     setupRenderQualityControls();
-    
+
     try {
         // Wait a bit for the app to fully initialize
         await new Promise(resolve => setTimeout(resolve, 100));
-        
+
         // Load initial model
         await loadModel(currentModelIndex);
-        
+
     } catch (error) {
         console.error("Failed to load initial model:", error);
-        
+
         // Try to load the first model as fallback
         if (currentModelIndex !== 0) {
             console.log("Attempting to load fallback model...");
@@ -200,7 +175,7 @@ function setupLipSyncControls(model: Live2DModel) {
     sliderContainer.innerHTML = `
         <label>Lip Sync Value: <span id="lipSyncValue">0</span></label>
     `;
-    
+
     const slider = document.createElement('input');
     slider.type = 'range';
     slider.min = '0';
@@ -212,9 +187,9 @@ function setupLipSyncControls(model: Live2DModel) {
         display: block;
         margin: 10px 0;
     `;
-    
+
     const valueDisplay = sliderContainer.querySelector('#lipSyncValue') as HTMLSpanElement;
-    
+
     slider.oninput = () => {
         const value = parseFloat(slider.value);
         modelWithLipSync.setLipSyncValue(value);
@@ -235,7 +210,7 @@ function setupLipSyncControls(model: Live2DModel) {
         background: #6f42c1;
         color: white;
     `;
-    
+
     let micActive = false;
     micButton.onclick = async () => {
         if (micActive) {
@@ -277,7 +252,7 @@ function setupLipSyncControls(model: Live2DModel) {
         background: #28a745;
         color: white;
     `;
-    
+
     autoButton.onclick = () => {
         if (autoAnimation) {
             clearInterval(autoAnimation);
@@ -288,7 +263,7 @@ function setupLipSyncControls(model: Live2DModel) {
             modelWithLipSync.startLipSync();
             toggleButton.textContent = 'Stop Lip Sync';
             toggleButton.style.background = '#dc3545';
-            
+
             // More realistic talking animation
             let talkingState = 'speaking'; // 'speaking', 'pause', 'breath'
             let stateTimer = 0;
@@ -298,25 +273,25 @@ function setupLipSyncControls(model: Live2DModel) {
             let syllableTimer = 0;
             let targetValue = 0;
             let currentValue = 0;
-            
+
             autoAnimation = setInterval(() => {
                 const deltaTime = 0.05; // 50ms
                 stateTimer += deltaTime;
-                
+
                 if (talkingState === 'speaking') {
                     // High-frequency mouth movement for realistic speech
                     syllableTimer += deltaTime;
                     const intensity = 0.7 + Math.random() * 0.3; // Variable intensity
-                    
+
                     // Generate rapid mouth movements every 0.05-0.12s (much faster)
                     if (syllableTimer > (0.05 + Math.random() * 0.07)) {
                         targetValue = Math.random() < 0.85 ? intensity * (0.3 + Math.random() * 0.7) : 0.05; // More frequent opening
                         syllableTimer = 0;
                     }
-                    
+
                     // Faster transition for quick speech movements
                     currentValue += (targetValue - currentValue) * 0.6;
-                    
+
                     if (stateTimer > speechDuration) {
                         talkingState = Math.random() < 0.7 ? 'pause' : 'breath';
                         stateTimer = 0;
@@ -327,7 +302,7 @@ function setupLipSyncControls(model: Live2DModel) {
                 } else if (talkingState === 'pause') {
                     // Mouth gradually closes during pause
                     currentValue *= 0.95;
-                    
+
                     if (stateTimer > pauseDuration) {
                         talkingState = 'speaking';
                         stateTimer = 0;
@@ -337,20 +312,20 @@ function setupLipSyncControls(model: Live2DModel) {
                     // Slight mouth opening for breathing
                     const breathPattern = Math.sin(stateTimer * 6) * 0.1 + 0.15;
                     currentValue += (breathPattern - currentValue) * 0.1;
-                    
+
                     if (stateTimer > breathDuration) {
                         talkingState = 'speaking';
                         stateTimer = 0;
                         syllableTimer = 0;
                     }
                 }
-                
+
                 const finalValue = Math.max(0, Math.min(1, currentValue));
                 modelWithLipSync.setLipSyncValue(finalValue);
                 slider.value = finalValue.toString();
                 valueDisplay.textContent = finalValue.toFixed(2);
             }, 50) as any;
-            
+
             autoButton.textContent = 'Stop Auto Animation';
             autoButton.style.background = '#dc3545';
         }
@@ -370,7 +345,7 @@ function setupLipSyncControls(model: Live2DModel) {
         background: #fd7e14;
         color: white;
     `;
-    
+
     speakButton.onclick = async () => {
         // Create a simple test audio (1 second beep tone)
         const audioContext = new AudioContext();
@@ -378,17 +353,17 @@ function setupLipSyncControls(model: Live2DModel) {
         const duration = 2; // 2 seconds
         const numChannels = 1;
         const numSamples = sampleRate * duration;
-        
+
         const audioBuffer = audioContext.createBuffer(numChannels, numSamples, sampleRate);
         const channelData = audioBuffer.getChannelData(0);
-        
+
         // Generate a simple test pattern (talking-like rhythm)
         for (let i = 0; i < numSamples; i++) {
             const t = i / sampleRate;
             const talkingPattern = Math.sin(t * 8 * Math.PI) * Math.sin(t * 2 * Math.PI) * 0.3;
             channelData[i] = talkingPattern * Math.exp(-t); // Fade out
         }
-        
+
         // Convert to base64 (simplified - in real use, you'd have proper audio encoding)
         try {
             await modelWithLipSync.speak('data:audio/wav;base64,fake', {
@@ -405,7 +380,7 @@ function setupLipSyncControls(model: Live2DModel) {
                         time += 0.1;
                         const value = Math.max(0, Math.sin(time * 8) * 0.5 + 0.3 + Math.random() * 0.2);
                         modelWithLipSync.setLipSyncValue(value);
-                        
+
                         if (time > 3) { // 3 second demo
                             clearInterval(demoAnimation);
                             modelWithLipSync.setLipSyncValue(0);
@@ -464,7 +439,7 @@ function setupFocusControls(model: Live2DModel) {
     const title = document.createElement('h3');
     title.textContent = 'Focus Controls';
     title.style.cssText = 'margin: 0 0 15px 0; color: #fff;';
-    
+
     // Force look at camera button
     const lookAtCameraButton = document.createElement('button');
     lookAtCameraButton.textContent = 'Look at Camera';
@@ -479,7 +454,7 @@ function setupFocusControls(model: Live2DModel) {
         background: #17a2b8;
         color: white;
     `;
-    
+
     // Eyes only lock button  
     const eyesOnlyButton = document.createElement('button');
     eyesOnlyButton.textContent = 'Eyes Only Look at Camera';
@@ -494,10 +469,10 @@ function setupFocusControls(model: Live2DModel) {
         background: #28a745;
         color: white;
     `;
-    
+
     let forceLookAtCamera = false;
     let focusInterval: number | null = null;
-    
+
     lookAtCameraButton.onclick = () => {
         if (forceLookAtCamera) {
             // Stop forcing look at camera
@@ -511,24 +486,24 @@ function setupFocusControls(model: Live2DModel) {
         } else {
             // Start forcing look at camera
             forceLookAtCamera = true;
-            
+
             // Immediately set focus to center
             if (model.internalModel && model.internalModel.focusController) {
                 model.internalModel.focusController.focus(0, 0, true);
             }
-            
+
             // Keep focusing at center every frame
             focusInterval = setInterval(() => {
                 if (model.internalModel && model.internalModel.focusController) {
                     model.internalModel.focusController.focus(0, 0, false);
                 }
             }, 16) as any; // ~60fps
-            
+
             lookAtCameraButton.textContent = 'Stop Looking';
             lookAtCameraButton.style.background = '#dc3545';
         }
     };
-    
+
     // Eyes only lock functionality
     eyesOnlyButton.onclick = () => {
         const modelWithEyesLock = model as any;
@@ -547,7 +522,7 @@ function setupFocusControls(model: Live2DModel) {
             eyesOnlyButton.style.background = '#dc3545';
         }
     };
-    
+
     // Auto Eye Blink button
     const eyeBlinkButton = document.createElement('button');
     eyeBlinkButton.textContent = 'Disable Auto Blink';
@@ -562,7 +537,7 @@ function setupFocusControls(model: Live2DModel) {
         background: #dc3545;
         color: white;
     `;
-    
+
     eyeBlinkButton.onclick = () => {
         const modelWithBlink = model as any;
         if (modelWithBlink.isEyeBlinkEnabled && modelWithBlink.isEyeBlinkEnabled()) {
@@ -577,19 +552,19 @@ function setupFocusControls(model: Live2DModel) {
             eyeBlinkButton.style.background = '#dc3545';
         }
     };
-    
+
     // Manual focus controls
     const manualControls = document.createElement('div');
     manualControls.innerHTML = `
         <p style="margin: 15px 0 5px 0; font-size: 14px;">Manual Focus:</p>
     `;
-    
+
     // X axis slider
     const xContainer = document.createElement('div');
     xContainer.innerHTML = `
         <label style="font-size: 12px;">X: <span id="focusX">0</span></label>
     `;
-    
+
     const xSlider = document.createElement('input');
     xSlider.type = 'range';
     xSlider.min = '-1';
@@ -601,13 +576,13 @@ function setupFocusControls(model: Live2DModel) {
         display: block;
         margin: 5px 0;
     `;
-    
+
     // Y axis slider
     const yContainer = document.createElement('div');
     yContainer.innerHTML = `
         <label style="font-size: 12px;">Y: <span id="focusY">0</span></label>
     `;
-    
+
     const ySlider = document.createElement('input');
     ySlider.type = 'range';
     ySlider.min = '-1';
@@ -619,10 +594,10 @@ function setupFocusControls(model: Live2DModel) {
         display: block;
         margin: 5px 0;
     `;
-    
+
     const xDisplay = xContainer.querySelector('#focusX') as HTMLSpanElement;
     const yDisplay = yContainer.querySelector('#focusY') as HTMLSpanElement;
-    
+
     xSlider.oninput = () => {
         if (!forceLookAtCamera) {
             const x = parseFloat(xSlider.value);
@@ -633,7 +608,7 @@ function setupFocusControls(model: Live2DModel) {
             xDisplay.textContent = x.toFixed(1);
         }
     };
-    
+
     ySlider.oninput = () => {
         if (!forceLookAtCamera) {
             const x = parseFloat(xSlider.value);
@@ -644,7 +619,7 @@ function setupFocusControls(model: Live2DModel) {
             yDisplay.textContent = y.toFixed(1);
         }
     };
-    
+
     // Reset button
     const resetButton = document.createElement('button');
     resetButton.textContent = 'Reset to Center';
@@ -659,7 +634,7 @@ function setupFocusControls(model: Live2DModel) {
         background: #6c757d;
         color: white;
     `;
-    
+
     resetButton.onclick = () => {
         xSlider.value = '0';
         ySlider.value = '0';
@@ -706,7 +681,7 @@ function setupModelSelector() {
     const title = document.createElement('h3');
     title.textContent = 'Model Selector';
     title.style.cssText = 'margin: 0 0 15px 0; color: #fff;';
-    
+
     // Model dropdown
     const modelSelect = document.createElement('select');
     modelSelect.style.cssText = `
@@ -729,7 +704,7 @@ function setupModelSelector() {
         }
         modelSelect.appendChild(option);
     });
-    
+
     // Loading indicator
     const loadingIndicator = document.createElement('div');
     loadingIndicator.style.cssText = `
@@ -739,7 +714,7 @@ function setupModelSelector() {
         margin: 10px 0;
     `;
     loadingIndicator.textContent = 'Loading model...';
-    
+
     // Load button
     const loadButton = document.createElement('button');
     loadButton.textContent = 'Load Model';
@@ -754,21 +729,21 @@ function setupModelSelector() {
         font-size: 14px;
         cursor: pointer;
     `;
-    
+
     loadButton.onclick = async () => {
         const selectedIndex = parseInt(modelSelect.value);
         if (selectedIndex === currentModelIndex || isLoadingModel) {
             console.log('Model already loaded or loading in progress');
             return;
         }
-        
+
         loadButton.disabled = true;
         modelSelect.disabled = true;
         loadButton.textContent = 'Loading...';
         loadingIndicator.style.display = 'block';
         loadingIndicator.textContent = 'Loading model...';
         loadingIndicator.style.color = '#17a2b8';
-        
+
         try {
             await loadModel(selectedIndex);
             loadButton.textContent = 'Load Model';
@@ -778,7 +753,7 @@ function setupModelSelector() {
             loadingIndicator.textContent = `Failed: ${error instanceof Error ? error.message : String(error)}`;
             loadingIndicator.style.color = '#dc3545';
             console.error('Model load error:', error);
-            
+
             // Reset loading indicator after 3 seconds
             setTimeout(() => {
                 loadingIndicator.textContent = 'Loading model...';
@@ -812,7 +787,7 @@ function setupModelSelector() {
     selectorPanel.appendChild(modelInfo);
 
     document.body.appendChild(selectorPanel);
-    
+
     // Store reference for updates
     (window as any).modelSelectorPanel = {
         select: modelSelect,
@@ -846,11 +821,11 @@ function updateControlsForModel(model: Live2DModel) {
         document.body.removeChild(focusControlsPanel);
         focusControlsPanel = null;
     }
-    
+
     // Create new control panels for the model
     setupLipSyncControls(model);
     setupFocusControls(model);
-    
+
     // Update model selector info
     const selectorPanel = (window as any).modelSelectorPanel;
     if (selectorPanel) {
@@ -879,13 +854,13 @@ function setupRenderQualityControls() {
     const title = document.createElement('h3');
     title.textContent = 'Render Quality';
     title.style.cssText = 'margin: 0 0 15px 0; color: #fff; font-size: 14px;';
-    
+
     // Resolution scale control
     const resolutionContainer = document.createElement('div');
     resolutionContainer.innerHTML = `
         <label style="font-size: 12px;">Resolution Scale: <span id="resolutionValue">1.0</span>x</label>
     `;
-    
+
     const resolutionSlider = document.createElement('input');
     resolutionSlider.type = 'range';
     resolutionSlider.min = '0.5';
@@ -896,27 +871,27 @@ function setupRenderQualityControls() {
         width: 100%;
         margin: 5px 0 15px 0;
     `;
-    
+
     const resolutionDisplay = resolutionContainer.querySelector('#resolutionValue') as HTMLSpanElement;
     resolutionDisplay.textContent = parseFloat(resolutionSlider.value).toFixed(1);
-    
+
     resolutionSlider.oninput = () => {
         const value = parseFloat(resolutionSlider.value);
         resolutionDisplay.textContent = value.toFixed(1);
-        
+
         // Update renderer resolution
         if (app && app.renderer) {
             app.renderer.resolution = value;
             app.renderer.resize(app.screen.width, app.screen.height);
         }
     };
-    
+
     // MSAA samples control
     const msaaContainer = document.createElement('div');
     msaaContainer.innerHTML = `
         <label style="font-size: 12px;">MSAA Samples: <span id="msaaValue">4</span>x</label>
     `;
-    
+
     const msaaSelect = document.createElement('select');
     msaaSelect.style.cssText = `
         width: 100%;
@@ -928,7 +903,7 @@ function setupRenderQualityControls() {
         color: white;
         font-size: 12px;
     `;
-    
+
     const msaaOptions = [
         { value: '1', label: '1x (Off)' },
         { value: '2', label: '2x' },
@@ -936,7 +911,7 @@ function setupRenderQualityControls() {
         { value: '8', label: '8x' },
         { value: '16', label: '16x (High-end only)' }
     ];
-    
+
     msaaOptions.forEach(option => {
         const optionElement = document.createElement('option');
         optionElement.value = option.value;
@@ -944,15 +919,15 @@ function setupRenderQualityControls() {
         if (option.value === '4') optionElement.selected = true;
         msaaSelect.appendChild(optionElement);
     });
-    
+
     const msaaDisplay = msaaContainer.querySelector('#msaaValue') as HTMLSpanElement;
-    
+
     msaaSelect.onchange = () => {
         const value = msaaSelect.value;
         msaaDisplay.textContent = value;
         console.log(`MSAA changed to ${value}x (requires page refresh to take effect)`);
     };
-    
+
     // Performance info
     const performanceInfo = document.createElement('div');
     performanceInfo.style.cssText = `
@@ -963,22 +938,22 @@ function setupRenderQualityControls() {
         background: rgba(255,255,255,0.05);
         border-radius: 3px;
     `;
-    
+
     // FPS counter
     let fps = 0;
     let fpsCounter = 0;
     let lastTime = performance.now();
-    
+
     function updateFPS() {
         const currentTime = performance.now();
         const deltaTime = currentTime - lastTime;
         fpsCounter++;
-        
+
         if (deltaTime >= 1000) {
             fps = Math.round((fpsCounter * 1000) / deltaTime);
             fpsCounter = 0;
             lastTime = currentTime;
-            
+
             performanceInfo.innerHTML = `
                 <strong>Performance:</strong><br>
                 FPS: ${fps}<br>
@@ -986,25 +961,25 @@ function setupRenderQualityControls() {
                 Canvas Size: ${app?.screen?.width || 'N/A'}×${app?.screen?.height || 'N/A'}
             `;
         }
-        
+
         requestAnimationFrame(updateFPS);
     }
-    
+
     updateFPS();
-    
+
     // Quality presets
     const presetsContainer = document.createElement('div');
     presetsContainer.innerHTML = `
         <label style="font-size: 12px; margin-bottom: 5px; display: block;">Quality Presets:</label>
     `;
-    
+
     const presetButtons = [
         { name: 'Low', resolution: 0.5 },
         { name: 'Medium', resolution: 1.0 },
         { name: 'High', resolution: 1.5 },
         { name: 'Ultra', resolution: 2.0 }
     ];
-    
+
     presetButtons.forEach(preset => {
         const button = document.createElement('button');
         button.textContent = preset.name;
@@ -1018,17 +993,17 @@ function setupRenderQualityControls() {
             font-size: 10px;
             cursor: pointer;
         `;
-        
+
         button.onclick = () => {
             resolutionSlider.value = preset.resolution.toString();
             resolutionDisplay.textContent = preset.resolution.toFixed(1);
-            
+
             if (app && app.renderer) {
                 app.renderer.resolution = preset.resolution;
                 app.renderer.resize(app.screen.width, app.screen.height);
             }
         };
-        
+
         presetsContainer.appendChild(button);
     });
 
