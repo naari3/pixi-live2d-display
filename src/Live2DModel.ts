@@ -9,7 +9,7 @@ import { Live2DTransform } from "./Live2DTransform";
 import type { JSONObject } from "./types/helpers";
 import { logger, AudioAnalyzer } from "./utils";
 
-export interface Live2DModelOptions extends MotionManagerOptions, AutomatorOptions {}
+export interface Live2DModelOptions extends MotionManagerOptions, AutomatorOptions { }
 
 /**
  * Interface for WebGL context with PixiJS UID extension
@@ -21,7 +21,7 @@ interface WebGLContextWithUID extends WebGL2RenderingContext {
 const tempPoint = new Point();
 const tempMatrix = new Matrix();
 
-export type Live2DConstructor = { new (options?: Live2DModelOptions): Live2DModel };
+export type Live2DConstructor = { new(options?: Live2DModelOptions): Live2DModel };
 
 /**
  * A wrapper that allows the Live2D model to be used as a DisplayObject in PixiJS.
@@ -182,9 +182,9 @@ export class Live2DModel<IM extends InternalModel = InternalModel> extends Conta
         if (!this.isReady()) {
             return;
         }
-        
+
         this.tag = `Live2DModel(${this.internalModel.settings.name})`;
-        
+
         // Update bounds area now that the internal model is loaded
         this.updateBoundsArea();
     }
@@ -228,12 +228,12 @@ export class Live2DModel<IM extends InternalModel = InternalModel> extends Conta
         try {
             // Get the WebGL source wrapper first
             const glSource = renderer.texture.getGlSource(texture.source);
-            
+
             if (glSource && (glSource as any).texture) {
                 // Extract the actual WebGL texture from the wrapper
                 return (glSource as any).texture;
             }
-            
+
             // Fallback: try the internal _glTextures approach
             const textureSourceWithGL = texture.source as any;
             if (textureSourceWithGL?._glTextures) {
@@ -300,7 +300,7 @@ export class Live2DModel<IM extends InternalModel = InternalModel> extends Conta
         if (!this.isReady()) {
             return;
         }
-        
+
         tempPoint.x = x;
         tempPoint.y = y;
 
@@ -342,7 +342,7 @@ export class Live2DModel<IM extends InternalModel = InternalModel> extends Conta
         if (!this.isReady()) {
             return [];
         }
-        
+
         tempPoint.x = x;
         tempPoint.y = y;
         this.toModelPosition(tempPoint, tempPoint);
@@ -365,7 +365,7 @@ export class Live2DModel<IM extends InternalModel = InternalModel> extends Conta
         // In Pixi.js v8, use toLocal method instead of manual worldTransform.applyInverse
         // First convert to local coordinates of this Live2DModel
         const localPosition = this.toLocal(position, undefined, result);
-        
+
         // Then apply the internal model's local transform if model is ready
         if (this.isReady()) {
             this.internalModel.localTransform.applyInverse(localPosition, localPosition);
@@ -403,7 +403,7 @@ export class Live2DModel<IM extends InternalModel = InternalModel> extends Conta
      */
     private _getContextUID(gl: WebGL2RenderingContext): number {
         const contextWithUID = gl as WebGLContextWithUID;
-        
+
         // Create a simple UID for the context if it doesn't have one
         if (!contextWithUID._pixiContextUID) {
             contextWithUID._pixiContextUID = Date.now() + Math.random();
@@ -428,28 +428,28 @@ export class Live2DModel<IM extends InternalModel = InternalModel> extends Conta
     private _onRenderCallback(): void {
         // Try to use cached renderer first, otherwise fall back to global access
         let webglRenderer = this.renderer;
-        
+
         if (!webglRenderer) {
             // Fallback to global application access
             const app = (globalThis as any).app || (window as any).app;
             if (!app?.renderer) {
                 return;
             }
-            
+
             const renderer = app.renderer as Renderer;
             if (!this.isWebGLRenderer(renderer)) {
                 return;
             }
-            
+
             webglRenderer = renderer;
             this.renderer = webglRenderer; // Cache for next time
         }
-        
+
         // Early exit if model cannot render
         if (!this.canRender()) {
             return;
         }
-        
+
         try {
             // In PixiJS v8, the batch/geometry/shader/state reset methods have been removed
             // These were used to reset renderer state, but v8's architecture no longer needs this
@@ -461,8 +461,8 @@ export class Live2DModel<IM extends InternalModel = InternalModel> extends Conta
             const contextUID = this._getContextUID(webglRenderer.gl);
             if (this.glContextID !== contextUID) {
                 this.glContextID = contextUID;
-                
-                if (this.isReady()){
+
+                if (this.isReady()) {
                     this.internalModel.updateWebGLContext(webglRenderer.gl, this.glContextID);
                 }
 
@@ -479,13 +479,13 @@ export class Live2DModel<IM extends InternalModel = InternalModel> extends Conta
 
                 // In v8, texture handling is different - no more baseTexture
                 const textureSourceWithGL = texture.source as any;
-                const shouldUpdate = shouldUpdateTexture || 
+                const shouldUpdate = shouldUpdateTexture ||
                     !textureSourceWithGL?._glTextures?.[this.glContextID];
 
                 // bind the WebGLTexture into Live2D core.
                 // In v8, get the actual WebGL texture object
                 const glTexture = this.extractWebGLTexture(webglRenderer, texture);
-                
+
                 if (this.isWebGLTexture(glTexture) && this.internalModel) {
                     // Set texture flip state right before binding each texture
                     if (shouldUpdate) {
@@ -494,7 +494,7 @@ export class Live2DModel<IM extends InternalModel = InternalModel> extends Conta
                             this.internalModel.textureFlipY,
                         );
                     }
-                    
+
                     this.internalModel.bindTexture(i, glTexture);
                 }
 
@@ -520,7 +520,7 @@ export class Live2DModel<IM extends InternalModel = InternalModel> extends Conta
                 width: webglRenderer.width || webglRenderer.screen?.width || 800,
                 height: webglRenderer.height || webglRenderer.screen?.height || 600
             };
-            
+
             if (this.internalModel) {
                 this.internalModel.viewport = [viewport.x, viewport.y, viewport.width, viewport.height];
 
@@ -533,7 +533,7 @@ export class Live2DModel<IM extends InternalModel = InternalModel> extends Conta
 
             // In v8, ensure worldTransform is properly calculated
             const worldTransform = this.worldTransform || this.groupTransform || this.localTransform;
-            
+
             // In PixiJS v8, we need to use the renderer's globalUniforms
             let projectionMatrix;
             if (webglRenderer.globalUniforms && 'projectionMatrix' in webglRenderer.globalUniforms) {
@@ -544,16 +544,16 @@ export class Live2DModel<IM extends InternalModel = InternalModel> extends Conta
                 const { width, height } = webglRenderer.screen;
                 projectionMatrix.set(2 / width, 0, 0, -2 / height, -1, 1);
             }
-            
+
             const internalTransform = tempMatrix
                 .copyFrom(projectionMatrix)
                 .append(worldTransform);
-            
+
             if (this.internalModel) {
                 this.internalModel.updateTransform(internalTransform);
                 this.internalModel.draw(webglRenderer.gl);
             }
-            
+
         } catch (error) {
             console.error("Error in Live2D render callback:", error);
         }
@@ -665,7 +665,7 @@ export class Live2DModel<IM extends InternalModel = InternalModel> extends Conta
 
         try {
             this.isSpeaking = true;
-            
+
             // Initialize audio analyzer if needed
             if (!this.audioAnalyzer) {
                 this.audioAnalyzer = new AudioAnalyzer();
@@ -684,14 +684,14 @@ export class Live2DModel<IM extends InternalModel = InternalModel> extends Conta
             // Speaking finished
             this.isSpeaking = false;
             this.setLipSyncValue(0);
-            
+
             if (options.onFinish) {
                 options.onFinish();
             }
         } catch (error) {
             this.isSpeaking = false;
             this.setLipSyncValue(0);
-            
+
             const errorObj = error instanceof Error ? error : new Error(String(error));
             if (options.onError) {
                 options.onError(errorObj);
@@ -709,7 +709,7 @@ export class Live2DModel<IM extends InternalModel = InternalModel> extends Conta
             this.audioAnalyzer.destroy();
             this.audioAnalyzer = null;
         }
-        
+
         this.isSpeaking = false;
         this.setLipSyncValue(0);
     }
@@ -785,13 +785,13 @@ export class Live2DModel<IM extends InternalModel = InternalModel> extends Conta
         }
 
         this.automator.destroy();
-        
+
         // Clean up audio resources
         if (this.audioAnalyzer) {
             this.audioAnalyzer.destroy();
             this.audioAnalyzer = null;
         }
-        
+
         if (this.isReady()) {
             this.internalModel.destroy();
         }
