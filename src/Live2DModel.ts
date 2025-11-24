@@ -165,6 +165,12 @@ export class Live2DModel<IM extends InternalModel = InternalModel> extends Conta
         if (this.isWebGLRenderer(renderer)) {
             this.renderer = renderer;
         }
+
+        // @ts-ignore
+        if (renderer.canvas) {
+            // @ts-ignore
+            this.registerInteraction(renderer.canvas);
+        }
     }
 
     /**
@@ -373,6 +379,38 @@ export class Live2DModel<IM extends InternalModel = InternalModel> extends Conta
 
         return localPosition;
     }
+
+    /**
+     * A method required by `PIXI.InteractionManager` to perform hit-testing.
+     * @param point - A Point in world space.
+     * @return True if the point is inside this model.
+     */
+    /**
+     * Registers interaction events directly on the canvas to bypass PixiJS's event system.
+     * This is necessary because PixiJS v8's EventSystem can sometimes provide incorrect
+     * world coordinates in certain environments (e.g. high DPI, specific scaling),
+     * causing hit detection to fail.
+     * @param canvas - The HTML canvas element.
+     */
+    registerInteraction(canvas: HTMLCanvasElement): void {
+        if (this._interactionRegistered) return;
+        
+        canvas.addEventListener('pointerdown', (e) => {
+            if (this.automator.autoInteract) {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                this.tap(x, y);
+            }
+        });
+        
+        this._interactionRegistered = true;
+    }
+
+    _interactionRegistered = false;
+
+
 
     /**
      * A method required by `PIXI.InteractionManager` to perform hit-testing.
