@@ -29,6 +29,8 @@ export class Cubism5MotionManager extends MotionManager<CubismMotion, CubismSpec
     eyeBlinkIds: CubismId[];
     lipSyncIds: CubismId[];
 
+    private _seconds: number = 0;
+
     constructor(settings: Cubism5ModelSettings, options?: MotionManagerOptions) {
         super(settings, options);
 
@@ -61,15 +63,21 @@ export class Cubism5MotionManager extends MotionManager<CubismMotion, CubismSpec
         return this.queueManager.isFinished();
     }
 
+    update(model: CubismModel, now: DOMHighResTimeStamp): boolean {
+        this._seconds = now;
+        return super.update(model, now);
+    }
+
     protected _startMotion(
         motion: CubismMotion,
         onFinish?: (motion: CubismMotion) => void,
     ): number {
         motion.setFinishedMotionHandler(onFinish as (motion: ACubismMotion) => void);
 
-        this.queueManager.stopAllMotions();
+        // Don't stop all motions - let the queue manager handle transitions
+        // This allows loop motions to continue seamlessly
 
-        return this.queueManager.startMotion(motion, false, performance.now());
+        return this.queueManager.startMotion(motion, false, this._seconds);
     }
 
     protected _stopAllMotions(): void {
@@ -95,6 +103,12 @@ export class Cubism5MotionManager extends MotionManager<CubismMotion, CubismSpec
         const motion = CubismMotion.create(arrayBuffer, byteLength);
         const json = new CubismMotionJson(arrayBuffer, byteLength);
 
+        // Apply loop setting from motion JSON
+        const isLoop = json.isMotionLoop();
+        motion.setIsLoop(isLoop);
+
+
+
         const defaultFadingDuration =
             (group === this.groups.idle
                 ? config.idleMotionFadingDuration
@@ -105,15 +119,23 @@ export class Cubism5MotionManager extends MotionManager<CubismMotion, CubismSpec
         // overwrite the fading duration only when it's not defined in the motion JSON
         if (json.getMotionFadeInTime() === undefined) {
             motion.setFadeInTime(
-                definition.FadeInTime! > 0 ? definition.FadeInTime! : defaultFadingDuration,
+                definition.FadeInTime !== undefined ? definition.FadeInTime : defaultFadingDuration,
             );
         }
 
         if (json.getMotionFadeOutTime() === undefined) {
             motion.setFadeOutTime(
-                definition.FadeOutTime! > 0 ? definition.FadeOutTime! : defaultFadingDuration,
+                definition.FadeOutTime !== undefined ? definition.FadeOutTime : defaultFadingDuration,
             );
         }
+
+        // Disable loop fade-in for seamless looping
+        // When FadeInTime is 0, we don't want fade-in at each loop cycle
+        if (isLoop && definition.FadeInTime === 0) {
+            motion.setIsLoopFadeIn(false);
+        }
+
+
 
         // Initialize with empty vectors to prevent null reference errors
         // The motion JSON already contains all necessary parameter information
