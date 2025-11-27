@@ -77,48 +77,29 @@ Live2DFactory.registerRuntime({
     },
 
     createPhysics(coreModel: CubismModel, data: any): CubismPhysics {
-        console.log("Creating physics with data type:", typeof data, "data:", data);
         try {
             // Try to use JSON object directly, bypassing ArrayBuffer conversion
             if (typeof data === "object") {
                 const jsonString = JSON.stringify(data);
-                console.log("Physics JSON string length:", jsonString.length);
                 const buffer = new TextEncoder().encode(jsonString);
-                console.log("Physics buffer length:", buffer.byteLength);
                 return CubismPhysics.create(buffer.buffer, buffer.byteLength);
             }
             return CubismPhysics.create(data, data.length);
         } catch (error) {
-            console.error("Physics creation error:", error);
             throw error;
         }
     },
 
     createPose(coreModel: CubismModel, data: any): CubismPose {
-        console.log("=== POSE CREATION DEBUG ===");
-        console.log("Data type:", typeof data);
-        console.log("Data structure:", data);
-        console.log("Data keys:", typeof data === "object" ? Object.keys(data) : "N/A");
-
         try {
             if (typeof data === "object") {
                 const jsonString = JSON.stringify(data);
-                console.log("JSON string preview:", jsonString.substring(0, 200) + "...");
-                console.log("JSON string length:", jsonString.length);
-
                 const buffer = new TextEncoder().encode(jsonString);
-                console.log("ArrayBuffer length:", buffer.byteLength);
-                console.log("First 32 bytes:", Array.from(buffer.slice(0, 32)));
-
                 const result = CubismPose.create(buffer.buffer, buffer.byteLength);
-                console.log("Pose creation result:", result);
                 return result;
             }
             return CubismPose.create(data, data.length);
         } catch (error) {
-            console.error("=== POSE CREATION FAILED ===");
-            console.error("Error:", error);
-            console.error("Stack:", (error as any).stack);
             throw error;
         }
     },

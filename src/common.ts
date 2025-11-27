@@ -10,3 +10,4 @@ export * from "./factory";
 export * from "./utils";
 export * from "./types/helpers.d";
 export * from "./types/events.d";
+export * from "./cubism-override-motion";

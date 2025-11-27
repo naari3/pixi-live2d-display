@@ -381,11 +381,6 @@ export class Live2DModel<IM extends InternalModel = InternalModel> extends Conta
     }
 
     /**
-     * A method required by `PIXI.InteractionManager` to perform hit-testing.
-     * @param point - A Point in world space.
-     * @return True if the point is inside this model.
-     */
-    /**
      * Registers interaction events directly on the canvas to bypass PixiJS's event system.
      * This is necessary because PixiJS v8's EventSystem can sometimes provide incorrect
      * world coordinates in certain environments (e.g. high DPI, specific scaling),

@@ -38,12 +38,6 @@ export class Cubism5MotionManager extends MotionManager<CubismMotion, CubismSpec
         this.eyeBlinkIds = settings.getEyeBlinkParameters() || [];
         this.lipSyncIds = settings.getLipSyncParameters() || [];
 
-        console.log("=== MOTION MANAGER INIT ===");
-        console.log("Motion definitions:", this.definitions);
-        console.log("Groups:", this.groups);
-        console.log("Has idle group?", !!this.groups.idle);
-        console.log("Idle motions:", this.definitions[this.groups.idle]);
-
         this.init(options);
     }
 
@@ -105,9 +99,7 @@ export class Cubism5MotionManager extends MotionManager<CubismMotion, CubismSpec
 
         // Apply loop setting from motion JSON
         const isLoop = json.isMotionLoop();
-        motion.setIsLoop(isLoop);
-
-
+        motion.setLoop(isLoop);
 
         const defaultFadingDuration =
             (group === this.groups.idle
@@ -134,8 +126,6 @@ export class Cubism5MotionManager extends MotionManager<CubismMotion, CubismSpec
         if (isLoop && definition.FadeInTime === 0) {
             motion.setIsLoopFadeIn(false);
         }
-
-
 
         // Initialize with empty vectors to prevent null reference errors
         // The motion JSON already contains all necessary parameter information
