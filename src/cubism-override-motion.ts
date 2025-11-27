@@ -602,7 +602,7 @@ export class CubismOverrideMotion extends ACubismMotion {
       }
 
       // Override update
-      if (this._lipSyncAdditive) {
+      if (this._parameterAdditiveIndicies.includes(parameterIndex)) {
         model.addParameterValueByIndex(parameterIndex, value, paramWeight);
       } else {
         model.setParameterValueByIndex(parameterIndex, value, paramWeight);
