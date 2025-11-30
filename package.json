@@ -15,6 +15,11 @@
       "import": "./dist/cubism5.es.js",
       "require": "./dist/cubism5.js"
     },
+    "./cubism": {
+      "types": "./types/cubism.d.ts",
+      "import": "./dist/cubism.es.js",
+      "require": "./dist/cubism.js"
+    },
     "./extra": {
       "types": "./types/extra.d.ts",
       "import": "./dist/extra.es.js",
@@ -32,9 +37,9 @@
     "playground": "vite",
     "test": "vitest",
     "test:u": "vitest --update",
-    "build": "rimraf dist && node scripts/build.js",
-    "pretype": "node scripts/patch-dts-generator.js",
-    "type": "rimraf types && dts-bundle-generator src/index.ts --no-check --project=tsconfig.build.json -o=types/index.d.ts && dts-bundle-generator src/extra.ts --no-check --project=tsconfig.build.json -o=types/extra.d.ts ",
+    "build": "rimraf dist && node scripts/generate-cubism-export.js && node scripts/build.js",
+    "pretype": "node scripts/generate-cubism-export.js && node scripts/patch-dts-generator.js",
+    "type": "rimraf types && dts-bundle-generator src/index.ts --no-check --project=tsconfig.build.json -o=types/index.d.ts && dts-bundle-generator src/extra.ts --no-check --project=tsconfig.build.json -o=types/extra.d.ts && dts-bundle-generator src/cubism.ts --no-check --project=tsconfig.build.json -o=types/cubism.d.ts ",
     "posttype": "node scripts/patch-types.js",
     "doc": "node scripts/gen-docs.js",
     "serve-docs": "mkdocs serve -f docs/mkdocs.yml",
