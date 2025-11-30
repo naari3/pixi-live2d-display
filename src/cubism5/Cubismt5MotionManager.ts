@@ -124,7 +124,7 @@ export class Cubism5MotionManager extends MotionManager<CubismMotion, CubismSpec
         // Disable loop fade-in for seamless looping
         // When FadeInTime is 0, we don't want fade-in at each loop cycle
         if (isLoop && definition.FadeInTime === 0) {
-            motion.setIsLoopFadeIn(false);
+            motion.setLoopFadeIn(false);
         }
 
         // Initialize with empty vectors to prevent null reference errors
